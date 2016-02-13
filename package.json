@@ -1,7 +1,7 @@
 {
   "name": "atom-idle-autosave",
   "main": "./lib/atom-idle-autosave",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Saves editor on idle",
   "keywords": [],
   "repository": "https://github.com/pvorona/atom-idle-autosave",
