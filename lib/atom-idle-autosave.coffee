@@ -1,32 +1,24 @@
+{CompositeDisposable} = require 'atom'
 _ = require 'lodash'
+config = require './config.coffee'
 
-debounce = 700
-
-withActiveEditor = (action) ->
-  action atom.workspace.getActiveTextEditor()
-
-timed = (marker, action) ->
-  console.time marker
-  result = do action
-  console.timeEnd marker
-  result
-
-notTemp = (action) -> (editor) ->
-  action editor if editor.getPath()?
-
-onlyModified = (action) -> (editor) ->
-  action editor if editor.isModified()
+debounce = 'atom-idle-autosave.debounce'
 
 save = (editor) ->
-  editor.save()
-
-debouncedSave = _.debounce (-> withActiveEditor notTemp onlyModified save), debounce
+  editor.save() if editor.getPath()
 
 module.exports =
-  disposables: []
-
   activate: ->
-    @disposables.push atom.workspace.observeTextEditors (editor) => @disposables.push editor.onDidChange debouncedSave
+    @subscriptions = new CompositeDisposable
+    @debouncedSave = _.debounce save, atom.config.get(debounce)
+    @subscriptions.add atom.workspace.observeTextEditors (editor) =>
+      @subscriptions.add editor.onDidChange @debouncedSave.bind(this, editor)
+
+    @subscriptions.add atom.config.onDidChange debounce, =>
+      @deactivate()
+      @activate()
 
   deactivate: ->
-    @disposables.forEach (disposable) -> disposable.dispose()
+    @subscriptions.dispose()
+
+  config: config
