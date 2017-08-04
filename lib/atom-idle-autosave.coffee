@@ -5,7 +5,11 @@ config = require './config.coffee'
 debounce = 'atom-idle-autosave.debounce'
 
 save = (editor) ->
-  try editor.save() if editor.getPath()
+  if not editor.isEmpty()
+    try
+      editor.save()
+    catch e
+      
 
 module.exports =
   activate: ->
